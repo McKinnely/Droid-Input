@@ -16,6 +16,9 @@ import java.text.NumberFormat;
  */
 public class MainActivity extends AppCompatActivity
 {
+    //Global
+    int quantity = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -25,13 +28,37 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
+     * This method is called when the plus button is clicked.
+     */
+
+    //
+
+
+    public void add(View view)
+    {
+        quantity++;
+        display(quantity);
+    }
+
+    /**
+     * This method is called when the minus button is clicked.
+     */
+
+    public void subtract(View view)
+    {
+        quantity--;
+        display(quantity);
+    }
+
+    /**
      * This method is called when the order button is clicked.
      */
-    int counter = 0;
+
     public void submitOrder(View view)
     {
-        display(2);
-        displayPrice(2 * 5);
+        int numberOfCoffees = quantity ;
+        display(numberOfCoffees);
+        displayPrice(numberOfCoffees * 5);
     }
 
     /**
@@ -51,4 +78,6 @@ public class MainActivity extends AppCompatActivity
         TextView priceTextView = (TextView) findViewById(R.id.price_text_view);
         priceTextView.setText(NumberFormat.getCurrencyInstance().format(number));
     }
+
+
 }

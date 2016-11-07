@@ -5,11 +5,16 @@
  * package com.example.android.justjava;
  */
 package com.example.mckinnely.justjava;
+
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.TextView;
-import java.text.NumberFormat;
+import android.widget.Toast;
 
 /**
  * This app displays an order form to order coffee.
@@ -18,7 +23,8 @@ public class MainActivity extends AppCompatActivity
 {
     //Global
     int quantity = 0;
-
+    boolean whippedCream = false;
+    boolean chocolateDip = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -31,11 +37,22 @@ public class MainActivity extends AppCompatActivity
      * This method is called when the plus button is clicked.
      */
 
-    //
-
 
     public void add(View view)
     {
+        if(quantity > 100)
+        {
+            quantity--;
+            Context context = getApplicationContext();
+            CharSequence messageUser = "We can only serve 100.";
+            int time = Toast.LENGTH_SHORT;
+
+            Toast toastMessage = Toast.makeText(context,messageUser, time);
+            toastMessage.show();
+
+            return;
+        }
+
         quantity++;
         display(quantity);
     }
@@ -46,6 +63,18 @@ public class MainActivity extends AppCompatActivity
 
     public void subtract(View view)
     {
+        if(quantity < 1)
+        {
+            Context context = getApplicationContext();
+            CharSequence messageUser = "You have to buy 1 or more coffees.";
+            int time = Toast.LENGTH_SHORT;
+
+            Toast toastMessage = Toast.makeText(context,messageUser, time);
+            toastMessage.show();
+
+            return;
+        }
+
         quantity--;
         display(quantity);
     }
@@ -56,11 +85,55 @@ public class MainActivity extends AppCompatActivity
 
     public void submitOrder(View view)
     {
-        String priceMessage = "Price $";
-        displayMessage(priceMessage + quantity * 5);
-        /*int numberOfCoffees = quantity ;
-        display(numberOfCoffees);
-        displayPrice(numberOfCoffees * 5);*/
+        CheckBox whippedCream_CheckBox = (CheckBox) findViewById(R.id.whipped_Cream_Checkbox);
+        CheckBox chocolateDip_CheckBox = (CheckBox) findViewById(R.id.chocolate_dip);
+        boolean hasWhippedCream = whippedCream_CheckBox.isChecked();
+        boolean hasChocolateDip = chocolateDip_CheckBox.isChecked();
+
+        whippedCream = hasWhippedCream;
+        chocolateDip = hasChocolateDip;
+
+        int price;
+        price =  calculatePrice();
+        String priceMessage = createOrderSummary(price);
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Java order for: " + getName());
+        intent.putExtra(Intent.EXTRA_TEXT, priceMessage);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+
+    }
+
+    private  String getName()
+    {
+        String userName;
+        TextView inputTextView = (TextView) findViewById(R.id.input_view);
+        userName = inputTextView.getText().toString();
+        userName = "Name: " + userName;
+        return  userName;
+    }
+
+    /**
+     * This method correctly calculates coffee.
+     */
+    private int calculatePrice()
+    {
+        int price = 2;
+        price = price  * quantity;
+
+        if(whippedCream)
+        {
+            price = price +  (quantity * 1);
+        }
+
+        if(chocolateDip)
+        {
+            price = price + (quantity * 2);
+        }
+
+        return price;
     }
 
     /**
@@ -73,22 +146,18 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * This method displays the given quantity value on the screen.
+     * This method displays the given order summary on the screen.
      */
-    private void displayPrice(int number)
+
+    private String createOrderSummary(int orderPrice)
     {
-        TextView priceTextView = (TextView) findViewById(R.id.price_text_view);
-        priceTextView.setText(NumberFormat.getCurrencyInstance().format(number));
+        String nameOnOrder =  getName();
+        nameOnOrder = nameOnOrder + "\nAdded whipped cream?  " + whippedCream;
+        nameOnOrder = nameOnOrder + "\nAdded chocolate dip?  " + chocolateDip;
+        nameOnOrder = nameOnOrder + "\nQuantity: " + quantity;
+        nameOnOrder = nameOnOrder + "\nTotal: $" + orderPrice;
+        nameOnOrder = nameOnOrder + "\nThank you!";
+
+        return nameOnOrder;
     }
-
-    /**
-     * This method displays the given text on the screen.
-     */
-    private void displayMessage(String message)
-    {
-        TextView priceTextView = (TextView) findViewById(R.id.price_text_view);
-        priceTextView.setText(message);
-    }
-
-
 }
